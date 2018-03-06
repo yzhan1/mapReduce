@@ -9,3 +9,4 @@ MapReduceExample.iml
 .settings/
 .idea/
 data/
+.DS_Store
