@@ -25,10 +25,11 @@ public class WordMapper extends Mapper<LongWritable, Text, Text, Text> {
 
     for (String content : contents) {
       String word = content.trim();
-      if (!stopWords.contains(word) && word.length() > 2) {
-        word = stem(word);
+      if (stopWords.contains(word) || word.length() < 3) {
+        continue;
       }
-      if (word.length() > 1 && !stopWords.contains(word)) {
+      word = stem(word);
+      if (!stopWords.contains(word) && word.length() > 1) {
         context.write(new Text(content), docID);
       }
     }
