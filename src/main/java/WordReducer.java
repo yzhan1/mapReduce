@@ -12,13 +12,12 @@ import org.apache.hadoop.mapreduce.Reducer;
 public class WordReducer extends Reducer<Text, Text, Text, Text> {
   @Override
   protected void reduce(Text key, Iterable<Text> values, Context ctx) throws IOException, InterruptedException {
-    //Using a set so docIds are not repeated
+    // Using a set so docIds are not repeated
     Set<String> docIds = new HashSet<>();
     for (Text t : values)
       docIds.add(t.toString());
     
     Text docIdsCommaSeparated = new Text(String.join(",", docIds));
-
     ctx.write(key, docIdsCommaSeparated);
   }
 }

@@ -12,18 +12,14 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
  */
 public class Driver {
   public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-    Path wiki0 = new Path(args[0]);
-    Path wiki1 = new Path(args[1]);
-    Path wiki2 = new Path(args[2]);
-    Path out = new Path(args[3]);
+    Path wiki = new Path(args[0]);
+    Path out = new Path(args[1]);
     
     Configuration conf = new Configuration();
-    Job job = Job.getInstance(conf, "name sorter");
+    Job job = Job.getInstance(conf, "COSI-132b Team4's map-reduce task");
     
     job.setInputFormatClass(TextInputFormat.class);
-    TextInputFormat.addInputPath(job, wiki0);
-    TextInputFormat.addInputPath(job, wiki1);
-    TextInputFormat.addInputPath(job, wiki2);
+    TextInputFormat.addInputPath(job, wiki);
     
     job.setOutputFormatClass(TextOutputFormat.class);
     TextOutputFormat.setOutputPath(job, out);
