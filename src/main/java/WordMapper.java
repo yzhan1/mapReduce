@@ -18,20 +18,17 @@ public class WordMapper extends Mapper<LongWritable, Text, Text, Text> {
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     String[] words = value.toString().split(",");
-    String docId = words[0];
-    String docContents = words[words.length - 1].toLowerCase().replaceAll("[^a-z]+", " ");
-    String[] contents = docContents.split("\\s+");
-    
-    int count = 0;
-    for (String content : contents) {
-      count++;
-      String word = content.trim();
+    String id = words[0];
+    String[] contents = words[3].toLowerCase().replaceAll("[^a-z]+", " ").split("\\s+");
+
+    for (int i = 0; i < contents.length; i++) {
+      String word = contents[i].trim();
       if (stopWords.contains(word) || word.length() < 3) {
         continue;
       }
       word = stem(word);
       if (!stopWords.contains(word) && word.length() > 1) {
-        context.write(new Text(content), new Text(docId + ";" + count));
+        context.write(new Text(contents[i]), new Text(id + ";" + i));
       }
     }
   }
