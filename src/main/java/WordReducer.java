@@ -6,8 +6,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 /**
- * @author Shu Lin Chan
- * lab #1
+ * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
+ * Final Project
  */
 public class WordReducer extends Reducer<Text, Text, Text, Text> {
   @Override

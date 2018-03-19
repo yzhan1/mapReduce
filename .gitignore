@@ -10,3 +10,4 @@ MapReduceExample.iml
 .idea/
 data/
 .DS_Store
+/bin/

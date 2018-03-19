@@ -7,8 +7,8 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 /**
- * @author Shu Lin Chan
- * lab #1
+ * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
+ * Final Project
  */
 public class Driver {
   public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
