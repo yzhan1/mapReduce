@@ -23,13 +23,12 @@ public class WordMapper extends Mapper<LongWritable, Text, Text, Text> {
 
     for (int i = 0; i < contents.length; i++) {
       String word = contents[i].trim();
-      if (stopWords.contains(word) || word.length() < 3) {
+      if (stopWords.contains(word) || word.length() < 3)
         continue;
-      }
       word = stem(word);
-      if (!stopWords.contains(word) && word.length() > 1) {
-        context.write(new Text(contents[i]), new Text(id + ";" + i));
-      }
+      if (stopWords.contains(word) || word.length() < 2)
+        continue;
+      context.write(new Text(contents[i]), new Text(id + ";" + i));
     }
   }
   

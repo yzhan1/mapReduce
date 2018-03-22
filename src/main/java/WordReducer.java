@@ -13,17 +13,16 @@ public class WordReducer extends Reducer<Text, Text, Text, Text> {
   @Override
   protected void reduce(Text key, Iterable<Text> values, Context ctx) throws IOException, InterruptedException {
     Map<String, String> map = new HashMap<>();
-    values.forEach((t) -> {
+    for (Text t : values) {
       String[] pair = t.toString().split(";");
       String id = pair[0];
       String content = map.containsKey(id) ? map.get(id) + "." + pair[1] : pair[1];
       map.put(id, content);
-    });
+    }
 
     StringBuilder builder = new StringBuilder();
     map.keySet().forEach((k) -> builder.append(k).append(".").append(map.get(k)).append(","));
 
-    Text output = new Text(builder.toString());
-    ctx.write(key, output);
+    ctx.write(key, new Text(builder.toString()));
   }
 }

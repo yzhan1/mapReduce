@@ -16,7 +16,7 @@ public class Driver {
     Path out = new Path(args[1]);
     
     Configuration conf = new Configuration();
-    Job job = Job.getInstance(conf, "COSI-132b Team4's map-reduce task");
+    Job job = Job.getInstance(conf, "cs132g4");
     
     job.setInputFormatClass(TextInputFormat.class);
     TextInputFormat.addInputPath(job, wiki);
