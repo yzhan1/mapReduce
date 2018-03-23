@@ -28,7 +28,7 @@ public class WordMapper extends Mapper<LongWritable, Text, Text, Text> {
       word = stem(word);
       if (stopWords.contains(word) || word.length() < 2)
         continue;
-      context.write(new Text(contents[i]), new Text(id + ";" + i));
+      context.write(new Text(contents[i]), new Text(i + ";" + id));
     }
   }
   

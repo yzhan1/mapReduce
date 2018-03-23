@@ -1,6 +1,7 @@
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -23,7 +24,7 @@ public class Driver {
     
     job.setOutputFormatClass(TextOutputFormat.class);
     TextOutputFormat.setOutputPath(job, out);
-    
+
     job.setJarByClass(Driver.class);
     job.setMapperClass(WordMapper.class);
     job.setOutputKeyClass(Text.class);
