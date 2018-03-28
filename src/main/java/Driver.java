@@ -1,11 +1,14 @@
 import java.io.IOException;
+
+import mapreduce.WordMapper;
+import mapreduce.WordReducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import writable.WikiWritable;
 
 /**
  * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
@@ -18,12 +21,12 @@ public class Driver {
     
     Configuration conf = new Configuration();
     Job job = Job.getInstance(conf, "cs132g4");
-    
-    job.setInputFormatClass(TextInputFormat.class);
+
     TextInputFormat.addInputPath(job, wiki);
-    
-    job.setOutputFormatClass(TextOutputFormat.class);
     TextOutputFormat.setOutputPath(job, out);
+
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(WikiWritable.class);
 
     job.setJarByClass(Driver.class);
     job.setMapperClass(WordMapper.class);
