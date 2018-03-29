@@ -38,4 +38,12 @@ public class WikiWritable implements WritableComparable<WikiWritable> {
     docId.readFields(dataInput);
     position.readFields(dataInput);
   }
+
+  public IntWritable getDocId() {
+    return docId;
+  }
+
+  public int getPosition() {
+    return Integer.valueOf(position.toString());
+  }
 }

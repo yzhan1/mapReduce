@@ -8,6 +8,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import secondarysort.WikiComparator;
+import secondarysort.WikiPartitioner;
 import writable.WikiWritable;
 
 /**
@@ -33,6 +35,8 @@ public class Driver {
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
     job.setReducerClass(WordReducer.class);
+    job.setPartitionerClass(WikiPartitioner.class);
+    job.setGroupingComparatorClass(WikiComparator.class);
     
     job.waitForCompletion(true);
   }

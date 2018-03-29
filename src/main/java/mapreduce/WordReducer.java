@@ -17,7 +17,7 @@ public class WordReducer extends Reducer<Text, WikiWritable, Text, Text> {
   protected void reduce(Text key, Iterable<WikiWritable> values, Context ctx) throws IOException, InterruptedException {
     Map<String, StringBuilder> map = new HashMap<>();
     for (WikiWritable w : values) {
-      String id = w.getDocId();
+      String id = String.valueOf(w.getDocId());
       if (map.containsKey(id)) {
         map.get(id).append(w.getPosition()).append(".");
       } else {
