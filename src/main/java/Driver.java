@@ -27,17 +27,17 @@ public class Driver {
     TextInputFormat.addInputPath(job, wiki);
     TextOutputFormat.setOutputPath(job, out);
 
-    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputKeyClass(WikiWritable.class);
     job.setMapOutputValueClass(WikiWritable.class);
 
     job.setJarByClass(Driver.class);
     job.setMapperClass(WordMapper.class);
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(Text.class);
+    job.setOutputKeyClass(WikiWritable.class);
+    job.setOutputValueClass(WikiWritable.class);
     job.setReducerClass(WordReducer.class);
     job.setPartitionerClass(WikiPartitioner.class);
     job.setGroupingComparatorClass(WikiComparator.class);
-    
+
     job.waitForCompletion(true);
   }
 }

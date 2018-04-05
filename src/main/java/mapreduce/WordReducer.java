@@ -12,9 +12,9 @@ import writable.WikiWritable;
  * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
  * Final Project
  */
-public class WordReducer extends Reducer<Text, WikiWritable, Text, Text> {
+public class WordReducer extends Reducer<WikiWritable, WikiWritable, Text, Text> {
   @Override
-  protected void reduce(Text key, Iterable<WikiWritable> values, Context ctx) throws IOException, InterruptedException {
+  protected void reduce(WikiWritable key, Iterable<WikiWritable> values, Context ctx) throws IOException, InterruptedException {
     Map<String, StringBuilder> map = new HashMap<>();
     for (WikiWritable w : values) {
       String id = String.valueOf(w.getDocId());
@@ -32,6 +32,6 @@ public class WordReducer extends Reducer<Text, WikiWritable, Text, Text> {
       builder.append(k).append(map.get(k)).append(";");
     });
 
-    ctx.write(key, new Text(builder.toString()));
+    ctx.write(key.getWord(), new Text(builder.toString()));
   }
 }

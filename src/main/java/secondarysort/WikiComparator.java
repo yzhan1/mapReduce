@@ -13,6 +13,6 @@ public class WikiComparator extends WritableComparator {
   public int compare(WritableComparable wc1, WritableComparable wc2) {
     WikiWritable w1 = (WikiWritable) wc1;
     WikiWritable w2 = (WikiWritable) wc2;
-    return w1.compareTo(w2);
+    return w1.getWord().compareTo(w2.getWord());
   }
 }
