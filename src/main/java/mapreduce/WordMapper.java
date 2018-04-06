@@ -33,11 +33,8 @@ public class WordMapper extends Mapper<LongWritable, Text, WikiWritable, WikiWri
       if (stopWords.contains(word) || word.length() < 2) {
         continue;
       }
-      WikiWritable reducerKey = new WikiWritable();
-      WikiWritable reducerVal = new WikiWritable();
-      reducerKey.set(contents[i], id, i);
-      reducerVal.set(id, i);
-      context.write(reducerKey, reducerVal);
+      WikiWritable reducerKeyVal = new WikiWritable(contents[i], id, i);
+      context.write(reducerKeyVal, reducerKeyVal);
     }
   }
   

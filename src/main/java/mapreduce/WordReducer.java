@@ -19,18 +19,15 @@ public class WordReducer extends Reducer<WikiWritable, WikiWritable, Text, Text>
     for (WikiWritable w : values) {
       String id = String.valueOf(w.getDocId());
       if (map.containsKey(id)) {
-        map.get(id).append(w.getPosition()).append(".");
+        map.get(id).append(".").append(w.getPosition());
       } else {
         map.put(id, new StringBuilder());
-        map.get(id).append(".").append(w.getPosition()).append(".");
+        map.get(id).append(id).append(".").append(w.getPosition());
       }
     }
 
     StringBuilder builder = new StringBuilder();
-    map.keySet().forEach((k) -> {
-      map.get(k).deleteCharAt(map.get(k).length() - 1);
-      builder.append(k).append(map.get(k)).append(";");
-    });
+    map.keySet().forEach((k) -> builder.append(map.get(k)).append(";"));
 
     ctx.write(key.getWord(), new Text(builder.toString()));
   }

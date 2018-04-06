@@ -19,12 +19,11 @@ public class WikiWritable implements Writable, WritableComparable<WikiWritable> 
     this.position = new IntWritable();
   }
 
-  public void set(String docId, int position) {
-    this.docId = new IntWritable(Integer.valueOf(docId));
-    this.position = new IntWritable(position);
+  public WikiWritable(String word, String docId, int position) {
+    set(word, docId, position);
   }
 
-  public void set(String word, String docId, int position) {
+  private void set(String word, String docId, int position) {
     this.word = new Text(word);
     this.docId = new IntWritable(Integer.valueOf(docId));
     this.position = new IntWritable(position);
