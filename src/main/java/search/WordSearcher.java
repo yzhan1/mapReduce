@@ -39,7 +39,7 @@ public class WordSearcher {
 
   public static void main(String[] args) {
     WordSearcher searcher = new WordSearcher();
-    searcher.search("aaa abc");
+    searcher.search("aaa");
     searcher.stop();
   }
 }
