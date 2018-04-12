@@ -11,3 +11,4 @@ MapReduceExample.iml
 data/
 .DS_Store
 /bin/
+spark-warehouse/

@@ -1,71 +1,64 @@
 package search;
 
-import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.Function;
-//import org.apache.spark.sql.Row;
-//import org.apache.spark.sql.RowFactory;
-//import org.apache.spark.sql.SQLContext;
-//import org.apache.spark.sql.types.DataTypes;
-//import org.apache.spark.sql.types.StructField;
-//import org.apache.spark.sql.types.StructType;
+import org.apache.spark.api.java.function.FilterFunction;
+import org.apache.spark.api.java.function.MapFunction;
+import org.apache.spark.sql.*;
 
-import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.List;
+import java.io.Serializable;
 
 public class WordSearcher {
   public static void main(String[] args) {
-    final String KEY_VALUE_DELIMITER = "	";
-    final String VALUE_DELIMITER = ";";
-    String input = "aaron";
+    String term = "aaa";
+    String logFile = "./output/part-r-00000";
+    SparkSession spark = SparkSession.builder().appName("WordSearcher").master("local[4]").getOrCreate();
+    Dataset<String> logData = spark.read().textFile(logFile).cache();
 
-    /*
-     * Prepare Spark context
-     */
-    SparkConf sparkConf = new SparkConf().setAppName("TestApp").setMaster("local[*]");
-    JavaSparkContext ctx = new JavaSparkContext(sparkConf);
-    JavaRDD<String> file = ctx.textFile("output/part-r-00000");
+    System.out.println(logData.filter((FilterFunction<String>) s -> s.contains(term)).first());
 
-    /*
-     * Sort the input to prepare the key to search for the possible words
-     */
-    char[] inputArray = input.toCharArray();
-    Arrays.sort(inputArray);
-    final String sortedInput = String.valueOf(inputArray);
+    JavaRDD<Word> wordRDD = spark.read()
+      .textFile("./output/part-r-00000")
+      .javaRDD()
+      .map((line) -> {
+        String[] parts = line.split("\\s+");
+        Word word = new Word();
+        word.setWord(parts[0]);
+        word.setPositions(parts[1]);
+        return word;
+      });
 
-    /*
-     * Search the data file for the possible words based on the key
-     */
-    JavaRDD<String> possibleWords = file.filter(new Function<String, Boolean>() {
-      public Boolean call(String s) {
-        return s.contains(sortedInput);
-      }
-    });
+    Dataset<Row> wordDF = spark.createDataFrame(wordRDD, Word.class);
+    wordDF.createOrReplaceTempView("words");
 
-    // the result can be cached in-memory for subsequent searches
-    // possibleWords.cache();
+    Dataset<Row> resultsDF = spark.sql("SELECT * FROM words WHERE word LIKE CONCAT('%', '" + term + "', '%')");
+    Encoder<String> stringEncoder = Encoders.STRING();
 
-    /*
-     * filter the key out and printout just the possible words
-     */
-    System.out.println("Possible words:-");
-    for (String s:possibleWords.collect()) {
-      if (s.contains(sortedInput) && s.contains(KEY_VALUE_DELIMITER)) {
-        String[] line = s.split(KEY_VALUE_DELIMITER);
-        if (line.length>0) {
-          String word = line[1].replace(KEY_VALUE_DELIMITER, "");
-          if (!word.isEmpty()) {
-            for (String w: word.split(VALUE_DELIMITER)) {
-              System.out.println(w);
-            }
-          }
-        }
-      }
+    Dataset<String> searchResultsDF = resultsDF.map(
+        (MapFunction<Row, String>) row -> "Word: " + row.<String>getAs("word") + " Pos: " + row.<String>getAs("positions"),
+        stringEncoder);
+    searchResultsDF.show();
+
+    spark.stop();
+  }
+
+  public static class Word implements Serializable {
+    private String word;
+    private String positions;
+
+    public String getWord() {
+      return word;
     }
-    System.out.println();
 
-    ctx.stop();
+    public String getPositions() {
+      return positions;
+    }
+
+    public void setWord(String w) {
+      word = w;
+    }
+
+    public void setPositions(String a) {
+      positions = a;
+    }
   }
 }
