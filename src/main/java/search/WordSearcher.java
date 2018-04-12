@@ -1,64 +1,45 @@
 package search;
 
+import models.Word;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.FilterFunction;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.*;
 
-import java.io.Serializable;
-
 public class WordSearcher {
-  public static void main(String[] args) {
-    String term = "aaa";
-    String logFile = "./output/part-r-00000";
-    SparkSession spark = SparkSession.builder().appName("WordSearcher").master("local[4]").getOrCreate();
-    Dataset<String> logData = spark.read().textFile(logFile).cache();
+  private SparkSession spark = SparkSession.builder().appName("WordSearcher").master("local[4]").getOrCreate();
 
-    System.out.println(logData.filter((FilterFunction<String>) s -> s.contains(term)).first());
-
+  public WordSearcher() {
     JavaRDD<Word> wordRDD = spark.read()
       .textFile("./output/part-r-00000")
       .javaRDD()
-      .map((line) -> {
+      .map(line -> {
         String[] parts = line.split("\\s+");
-        Word word = new Word();
-        word.setWord(parts[0]);
-        word.setPositions(parts[1]);
-        return word;
-      });
+        return new Word(parts[0], parts[1]);
+      }).cache();
 
-    Dataset<Row> wordDF = spark.createDataFrame(wordRDD, Word.class);
+    Dataset<Row> wordDF = spark.createDataFrame(wordRDD, Word.class).cache();
     wordDF.createOrReplaceTempView("words");
+  }
 
+  public void search(String term) {
     Dataset<Row> resultsDF = spark.sql("SELECT * FROM words WHERE word LIKE CONCAT('%', '" + term + "', '%')");
     Encoder<String> stringEncoder = Encoders.STRING();
 
-    Dataset<String> searchResultsDF = resultsDF.map(
-        (MapFunction<Row, String>) row -> "Word: " + row.<String>getAs("word") + " Pos: " + row.<String>getAs("positions"),
-        stringEncoder);
-    searchResultsDF.show();
+    resultsDF.show();
+//    Dataset<String> searchResultsDF = resultsDF.map(
+//      (MapFunction<Row, String>) row -> "Word: " + row.getAs("word") + " Pos: " + row.getAs("positions"),
+//      stringEncoder
+//    );
+//    searchResultsDF.show();
+  }
 
+  public void stop() {
     spark.stop();
   }
 
-  public static class Word implements Serializable {
-    private String word;
-    private String positions;
-
-    public String getWord() {
-      return word;
-    }
-
-    public String getPositions() {
-      return positions;
-    }
-
-    public void setWord(String w) {
-      word = w;
-    }
-
-    public void setPositions(String a) {
-      positions = a;
-    }
+  public static void main(String[] args) {
+    WordSearcher searcher = new WordSearcher();
+    searcher.search("aaa abc");
+    searcher.stop();
   }
 }

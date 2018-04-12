@@ -27,7 +27,7 @@ public class WordReducer extends Reducer<WikiWritable, WikiWritable, Text, Text>
     }
 
     StringBuilder builder = new StringBuilder();
-    map.keySet().forEach((k) -> builder.append(map.get(k)).append(";"));
+    map.keySet().forEach(k -> builder.append(map.get(k)).append(";"));
 
     ctx.write(key.getWord(), new Text(builder.toString()));
   }
