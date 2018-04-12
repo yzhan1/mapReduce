@@ -12,3 +12,4 @@ data/
 .DS_Store
 /bin/
 spark-warehouse/
+words.parquet/
