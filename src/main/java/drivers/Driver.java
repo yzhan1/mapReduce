@@ -1,3 +1,5 @@
+package drivers;
+
 import java.io.IOException;
 
 import mapreduce.WordMapper;

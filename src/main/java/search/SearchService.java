@@ -8,6 +8,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.*;
+import org.springframework.stereotype.Service;
 import scala.Tuple2;
 
 import java.io.File;
@@ -17,11 +18,12 @@ import java.util.*;
  * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
  * Final Project
  */
-public class WordSearcher {
+//@Service
+public class SearchService {
   private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
   private JavaSparkContext sc = JavaSparkContext.fromSparkContext(spark.sparkContext());
 
-  public WordSearcher() {
+  public SearchService() {
     loadIndex();
   }
 
@@ -65,9 +67,8 @@ public class WordSearcher {
 
       articleRDD.saveAsObjectFile("./articles");
     }
-    articleRDD.cache();
 
-    return articleRDD.lookup(id).get(0);
+    return articleRDD.cache().lookup(id).get(0);
   }
 
   public void search(String terms) {
@@ -119,7 +120,7 @@ public class WordSearcher {
   }
 
   public static void main(String[] args) {
-    WordSearcher searcher = new WordSearcher();
+    SearchService searcher = new SearchService();
     searcher.search("abrar & ababa | aaa");
     searcher.stop();
   }

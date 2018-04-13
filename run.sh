@@ -6,10 +6,10 @@ then
 elif [ "$1" = "spark" ]
 then
     mvn package && \
-    ../../spark/bin/spark-submit --class "search.WordSearcher" --master local[4] ./target/cs132g4-0.7.jar
+    ../../spark/bin/spark-submit --class "search.SearchService" --master local[4] ./target/cs132g4-0.7.jar
 elif [ "$1" = "web" ]
 then
-    echo "Not implemented"
+    mvn package && java -cp ./target/cs132g4-0.7.jar drivers.Application
 else
     echo "App not recognized"
 fi
