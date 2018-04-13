@@ -4,6 +4,10 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import writable.WikiWritable;
 
+/**
+ * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
+ * Final Project
+ */
 public class WikiComparator extends WritableComparator {
   public WikiComparator() {
     super(WikiWritable.class, true);

@@ -6,6 +6,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
+ * Final Project
+ */
 public class WikiWritable implements Writable, WritableComparable<WikiWritable> {
   private Text word; // natural key
 

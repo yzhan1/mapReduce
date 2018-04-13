@@ -13,6 +13,10 @@ import scala.Tuple2;
 import java.io.File;
 import java.util.*;
 
+/**
+ * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
+ * Final Project
+ */
 public class WordSearcher {
   private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
   private JavaSparkContext sc = JavaSparkContext.fromSparkContext(spark.sparkContext());
@@ -68,8 +72,7 @@ public class WordSearcher {
 
   public void search(String terms) {
     String[] strings = terms.split("\\s+");
-    StringBuilder query = new StringBuilder();
-    query.append("SELECT * FROM words WHERE ");
+    StringBuilder query = new StringBuilder("SELECT * FROM words WHERE ");
     for (int i = 0; i < strings.length; i++) {
       String s = WordMapper.stem(strings[i].toLowerCase().trim());
 

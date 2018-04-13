@@ -2,6 +2,10 @@ package models;
 
 import java.io.Serializable;
 
+/**
+ * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
+ * Final Project
+ */
 public class Word implements Serializable {
   private String word;
   private String positions;
