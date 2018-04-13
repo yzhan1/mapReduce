@@ -1,22 +1,32 @@
 package search;
 
 import com.google.common.collect.Sets;
+import mapreduce.WordMapper;
+import models.Article;
 import models.Word;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.ForeachFunction;
-import org.apache.spark.api.java.function.MapFunction;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.*;
+import scala.Tuple2;
 
+import java.io.File;
 import java.util.*;
 
 public class WordSearcher {
-  private SparkSession spark = SparkSession.builder().appName("WordSearcher").master("local[4]").getOrCreate();
+  private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
+  private JavaSparkContext sc = JavaSparkContext.fromSparkContext(spark.sparkContext());
 
   public WordSearcher() {
+    loadIndex();
+  }
+
+  private void loadIndex() {
     Dataset<Row> wordDF;
+    // TODO: Change to HDFS for cluster
     try {
       System.out.println("Reading from saved file");
-      wordDF = spark.read().parquet("./words.parquet");
+      wordDF = spark.read().parquet("./words.parquet").cache();
     } catch (Exception e) {
       System.out.println("Loading from file");
 
@@ -31,30 +41,48 @@ public class WordSearcher {
       wordDF = spark.createDataFrame(wordRDD, Word.class).cache();
       wordDF.write().parquet("./words.parquet");
     }
-
     wordDF.createOrReplaceTempView("words");
+  }
+
+  private Article getArticle(int id) {
+    JavaPairRDD<Integer, Article> articleRDD;
+
+    // TODO: Change to HDFS for cluster
+    if ((new File("./articles")).exists()) {
+      System.out.println("Loading article from saved file");
+      articleRDD = JavaPairRDD.fromJavaRDD(sc.objectFile("./articles"));
+    } else {
+      System.out.println("Loading article from csv file");
+      articleRDD = spark.read()
+        .textFile("./data/wiki_00.csv")
+        .javaRDD()
+        .map(line -> line.split(","))
+        .mapToPair(s -> new Tuple2<>(Integer.valueOf(s[0]), new Article(Integer.valueOf(s[0]), s[1], s[2], s[3]))).cache();
+
+      articleRDD.saveAsObjectFile("./articles");
+    }
+    articleRDD.cache();
+
+    return articleRDD.lookup(id).get(0);
   }
 
   public void search(String terms) {
     String[] strings = terms.split("\\s+");
     StringBuilder query = new StringBuilder();
     query.append("SELECT * FROM words WHERE ");
-    boolean first = true;
-    for (String s : strings) {
-      if (s.equals("&") || s.equals("|") || s.equals("-")) {
-        continue;
-      }
-      if (!first) query.append("OR ");
-      query.append("word = '").append(s).append("' ");
-      first = false;
-    }
-    Dataset<Row> resultsDF = spark.sql(query.toString());
+    for (int i = 0; i < strings.length; i++) {
+      String s = WordMapper.stem(strings[i].toLowerCase().trim());
 
-    List<Row> res = resultsDF.collectAsList();
+      if (s.equals("&") || s.equals("|") || s.equals("-")) continue;
+      if (i != 0) query.append("OR ");
+      query.append("word = '").append(s).append("' ");
+    }
+
+    List<Row> queryResult = spark.sql(query.toString()).collectAsList();
 
     List<Set<String>> map = new ArrayList<>();
 
-    res.forEach(row -> {
+    queryResult.forEach(row -> {
       String[] positions = row.getAs("positions").toString().split(";");
       Set<String> appearances = new HashSet<>();
       for (String pos : positions) {
@@ -65,30 +93,22 @@ public class WordSearcher {
     });
 
     Set<String> result = map.get(0);
-
     int positionCount = 0;
     for (int i = 0; i < strings.length; i++) {
       String current = strings[i++];
-      switch (current) {
-        case "&":
-          result = Sets.intersection(result, map.get(positionCount++));
-          break;
-        case "|":
-          result = Sets.union(result, map.get(positionCount++));
-          break;
-        case "-":
-          result = Sets.difference(result, map.get(positionCount++));
-          break;
-        default:
-          result = Sets.union(result, map.get(positionCount++));
-          i--;
-          break;
+      if ("&".equals(current)) {
+        result = Sets.intersection(result, map.get(positionCount++));
+      } else if ("|".equals(current)) {
+        result = Sets.union(result, map.get(positionCount++));
+      } else if ("-".equals(current)) {
+        result = Sets.difference(result, map.get(positionCount++));
+      } else {
+        result = Sets.union(result, map.get(positionCount++));
+        i--;
       }
     }
 
-    for (String val : result) {
-      System.out.println(val);
-    }
+    result.forEach(r -> System.out.println(getArticle(Integer.valueOf(r))));
   }
 
   public void stop() {
@@ -97,7 +117,7 @@ public class WordSearcher {
 
   public static void main(String[] args) {
     WordSearcher searcher = new WordSearcher();
-    searcher.search("abrar & ababa");
+    searcher.search("abrar & ababa | aaa");
     searcher.stop();
   }
 }

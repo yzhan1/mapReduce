@@ -13,3 +13,4 @@ data/
 /bin/
 spark-warehouse/
 words.parquet/
+articles/

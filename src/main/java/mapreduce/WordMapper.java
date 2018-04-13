@@ -39,7 +39,7 @@ public class WordMapper extends Mapper<LongWritable, Text, WikiWritable, WikiWri
     }
   }
   
-  private String stem(String str) {
+  public static String stem(String str) {
     stemmer.setCurrent(str);
     stemmer.stem();
     return stemmer.getCurrent().trim();
