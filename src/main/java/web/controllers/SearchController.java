@@ -11,8 +11,8 @@ import search.SearchService;
  */
 @RestController
 public class SearchController {
-//  @Autowired
-//  SearchService service;
+  @Autowired
+  SearchService service;
 
   @RequestMapping("/")
   public String index() {
