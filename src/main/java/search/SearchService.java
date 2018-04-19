@@ -32,42 +32,45 @@ public class SearchService {
   private void loadIndex() {
     Dataset<Row> wordDF;
     // TODO: Change to HDFS for cluster
-    try {
-      System.out.println("Reading from saved file");
-      wordDF = spark.read().parquet("hdfs://cs132g4/words.parquet").cache();
-    } catch (Exception e) {
-      System.out.println("Loading from file");
+//    try {
+//      System.out.println("Reading from saved file");
+//      wordDF = spark.read().parquet("./words.parquet").cache();
+//    } catch (Exception e) {
+//
+//      wordDF.write().parquet("./words.parquet");
+//    }
+    System.out.println("Loading from file");
 
-      JavaRDD<Word> wordRDD = spark.read()
-        .textFile("hdfs://cs132g4/output7")
-        .javaRDD()
-        .map(line -> {
-          String[] parts = line.split("\\s+");
-          return new Word(parts[0], parts[1]);
-        }).cache();
+    JavaRDD<Word> wordRDD = spark.read()
+//      .textFile("./output/part-r-00000")
+      .textFile("hdfs://output7")
+      .javaRDD()
+      .map(line -> {
+        String[] parts = line.split("\\s+");
+        return new Word(parts[0], parts[1]);
+      }).cache();
 
-      wordDF = spark.createDataFrame(wordRDD, Word.class).cache();
-      wordDF.write().parquet("hdfs://cs132g4/words.parquet");
-    }
+    wordDF = spark.createDataFrame(wordRDD, Word.class).cache();
     wordDF.createOrReplaceTempView("words");
   }
 
   private void loadArticles() {
-//    // TODO: Change to HDFS for cluster
+    // TODO: Change to HDFS for cluster
 //    if ((new File("./articles")).exists()) {
 //      System.out.println("Loading article from saved file");
-//      articleRDD = JavaPairRDD.fromJavaRDD(sc.objectFile("hdfs://cs132g4/articles"));
+//      articleRDD = JavaPairRDD.fromJavaRDD(sc.objectFile("./articles"));
 //    } else {
 //
 //    }
     System.out.println("Loading article from csv file");
     articleRDD = spark.read()
+//      .textFile("./data/wiki_00.csv")
       .textFile("hdfs://data/wiki_csv")
       .javaRDD()
       .map(line -> line.split(","))
       .mapToPair(s -> new Tuple2<>(Integer.valueOf(s[0]), new Article(Integer.valueOf(s[0]), s[1], s[2], s[3]))).cache();
 
-    articleRDD.saveAsObjectFile("hdfs://cs132g4/articles");
+    // articleRDD.saveAsObjectFile("./articles");
   }
 
   private Article getArticle(int id) {
