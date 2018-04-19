@@ -43,7 +43,7 @@ public class SearchService {
 
     JavaRDD<Word> wordRDD = spark.read()
 //      .textFile("./output/part-r-00000")
-      .textFile("hdfs://output7")
+      .textFile("hdfs://user/cs132g4/output7")
       .javaRDD()
       .map(line -> {
         String[] parts = line.split("\\s+");
