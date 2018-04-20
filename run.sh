@@ -6,7 +6,7 @@ then
 elif [ "$1" = "spark" ]
 then
     mvn clean package && \
-    ../../spark/bin/spark-submit --class "search.SearchService" --master local[4] ./target/cs132g4-0.7.jar "abrar & ababa | aaa"
+    ../../spark/bin/spark-submit --class "search.SearchService" --master local[4] ./target/cs132g4-0.7.jar "xml & xaa | xanadu"
 elif [ "$1" = "web" ]
 then
     mvn clean package && java -cp ./target/cs132g4-0.7.jar drivers.Application

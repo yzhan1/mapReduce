@@ -24,7 +24,6 @@ import java.util.*;
 //@Service
 public class SearchService {
     private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
-    private JavaSparkContext sc = JavaSparkContext.fromSparkContext(spark.sparkContext());
 
     public SearchService() {
         loadIndex();
@@ -45,7 +44,7 @@ public class SearchService {
 
         JavaRDD<Word> wordRDD = spark.read()
 //      .textFile("./output/")
-            .textFile("/user/cs132g4/output8/part-r-00000")
+            .textFile("/user/cs132g4/output8/part-r-00023")
             .javaRDD()
             .map(line -> {
                 String[] parts = line.split("\\s+");
