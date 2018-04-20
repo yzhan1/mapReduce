@@ -7,31 +7,31 @@ import java.io.Serializable;
  * Final Project
  */
 public class Word implements Serializable {
-  private String word;
-  private String positions;
+    private String word;
+    private String positions;
 
-  public Word() {
-  }
+    public Word() {
+    }
 
-  public Word(String w, String p) {
-    this();
-    setWord(w);
-    setPositions(p);
-  }
+    public Word(String w, String p) {
+        this();
+        setWord(w);
+        setPositions(p);
+    }
 
-  public String getWord() {
-    return word;
-  }
+    public String getWord() {
+        return word;
+    }
 
-  public String getPositions() {
-    return positions;
-  }
+    public String getPositions() {
+        return positions;
+    }
 
-  public void setWord(String w) {
-    word = w;
-  }
+    public void setWord(String w) {
+        word = w;
+    }
 
-  public void setPositions(String a) {
-    positions = a;
-  }
+    public void setPositions(String a) {
+        positions = a;
+    }
 }

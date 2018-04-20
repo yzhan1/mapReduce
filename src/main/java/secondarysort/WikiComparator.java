@@ -9,14 +9,14 @@ import writable.WikiWritable;
  * Final Project
  */
 public class WikiComparator extends WritableComparator {
-  public WikiComparator() {
-    super(WikiWritable.class, true);
-  }
+    public WikiComparator() {
+        super(WikiWritable.class, true);
+    }
 
-  @Override
-  public int compare(WritableComparable wc1, WritableComparable wc2) {
-    WikiWritable w1 = (WikiWritable) wc1;
-    WikiWritable w2 = (WikiWritable) wc2;
-    return w1.getWord().compareTo(w2.getWord());
-  }
+    @Override
+    public int compare(WritableComparable wc1, WritableComparable wc2) {
+        WikiWritable w1 = (WikiWritable) wc1;
+        WikiWritable w2 = (WikiWritable) wc2;
+        return w1.getWord().compareTo(w2.getWord());
+    }
 }

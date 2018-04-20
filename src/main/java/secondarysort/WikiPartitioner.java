@@ -8,9 +8,9 @@ import writable.WikiWritable;
  * Final Project
  */
 public class WikiPartitioner extends Partitioner<WikiWritable, WikiWritable> {
-  @Override
-  public int getPartition(WikiWritable wikiWritable, WikiWritable wikiWritable2, int i) {
-    int hash = wikiWritable.getWord().charAt(0) - 'a';
-    return Math.abs(hash % i);
-  }
+    @Override
+    public int getPartition(WikiWritable wikiWritable, WikiWritable wikiWritable2, int i) {
+        int hash = wikiWritable.getWord().charAt(0) - 'a';
+        return Math.abs(hash % i);
+    }
 }

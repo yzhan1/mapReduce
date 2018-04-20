@@ -18,28 +18,28 @@ import writable.WikiWritable;
  * Final Project
  */
 public class Driver {
-  public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-    Path wiki = new Path(args[0]);
-    Path out = new Path(args[1]);
-    
-    Configuration conf = new Configuration();
-    Job job = Job.getInstance(conf, "cs132g4");
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+        Path wiki = new Path(args[0]);
+        Path out = new Path(args[1]);
 
-    job.setNumReduceTasks(26);
-    TextInputFormat.addInputPath(job, wiki);
-    TextOutputFormat.setOutputPath(job, out);
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "cs132g4");
 
-    job.setMapOutputKeyClass(WikiWritable.class);
-    job.setMapOutputValueClass(WikiWritable.class);
+        job.setNumReduceTasks(26);
+        TextInputFormat.addInputPath(job, wiki);
+        TextOutputFormat.setOutputPath(job, out);
 
-    job.setJarByClass(Driver.class);
-    job.setMapperClass(WordMapper.class);
-    job.setOutputKeyClass(WikiWritable.class);
-    job.setOutputValueClass(WikiWritable.class);
-    job.setReducerClass(WordReducer.class);
-    job.setPartitionerClass(WikiPartitioner.class);
-    job.setGroupingComparatorClass(WikiComparator.class);
+        job.setMapOutputKeyClass(WikiWritable.class);
+        job.setMapOutputValueClass(WikiWritable.class);
 
-    job.waitForCompletion(true);
-  }
+        job.setJarByClass(Driver.class);
+        job.setMapperClass(WordMapper.class);
+        job.setOutputKeyClass(WikiWritable.class);
+        job.setOutputValueClass(WikiWritable.class);
+        job.setReducerClass(WordReducer.class);
+        job.setPartitionerClass(WikiPartitioner.class);
+        job.setGroupingComparatorClass(WikiComparator.class);
+
+        job.waitForCompletion(true);
+    }
 }

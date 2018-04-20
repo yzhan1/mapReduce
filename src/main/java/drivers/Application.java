@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan(basePackages = {"web.controllers", "search", "drivers"})
 public class Application {
-  public static void main(String[] args) {
-    SpringApplication.run(Application.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 }
