@@ -4,9 +4,7 @@ import com.google.common.collect.Sets;
 import mapreduce.WordMapper;
 import models.Article;
 import models.Word;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.*;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
@@ -24,13 +22,13 @@ import java.util.*;
 //@Service
 public class SearchService {
     private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
+    private JavaRDD<Word> wordRDD;
 
     public SearchService(String s) {
         loadIndex(s);
     }
 
     private void loadIndex(String s) {
-        Dataset<Row> wordDF;
         // TODO: Change to HDFS for cluster
 //    try {
 //      System.out.println("Reading from saved file");
@@ -41,19 +39,13 @@ public class SearchService {
 //    }
         System.out.println("Loading from file");
 
-
-        JavaRDD<Word> wordRDD = spark.read()
-//      .textFile("./output/")
-            // "/user/cs132g4/output8/part-r-00023"
+        wordRDD = spark.read()
             .textFile(s)
             .javaRDD()
             .map(line -> {
                 String[] parts = line.split("\\s+");
                 return new Word(parts[0], parts[1]);
             }).cache();
-
-        wordDF = spark.createDataFrame(wordRDD, Word.class).cache();
-        wordDF.createOrReplaceTempView("words");
     }
 
     private Article getArticle(int id) throws IOException, InterruptedException {
@@ -65,21 +57,26 @@ public class SearchService {
 
     public void search(String terms) {
         String[] strings = terms.split("\\s+");
-        StringBuilder query = new StringBuilder("SELECT * FROM words WHERE ");
+        StringBuilder query = new StringBuilder();
         for (int i = 0; i < strings.length; i++) {
             String s = WordMapper.stem(strings[i].toLowerCase().trim());
 
             if (s.equals("&") || s.equals("|") || s.equals("-")) continue;
-            if (i != 0) query.append("OR ");
-            query.append("word = '").append(s).append("' ");
+            if (i != 0) query.append(" ");
+            query.append(s);
         }
 
-        List<Row> queryResult = spark.sql(query.toString()).collectAsList();
+        String[] arr = query.toString().split(" ");
+        List<String> words = Arrays.asList(arr);
+
+//        List<Row> queryResult = spark.sql(query.toString()).collectAsList();
+
+        List<Word> queryResult = wordRDD.filter(word -> words.contains(word.getWord())).collect();
 
         List<Set<String>> map = new ArrayList<>();
 
-        queryResult.forEach(row -> {
-            String[] positions = row.getAs("positions").toString().split(";");
+        queryResult.forEach(word -> {
+            String[] positions = word.getPositions().split(";");
             Set<String> appearances = new HashSet<>();
             for (String pos : positions) {
                 String docId = pos.substring(0, pos.indexOf("."));
