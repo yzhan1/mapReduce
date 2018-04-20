@@ -25,11 +25,11 @@ import java.util.*;
 public class SearchService {
     private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
 
-    public SearchService() {
-        loadIndex();
+    public SearchService(String s) {
+        loadIndex(s);
     }
 
-    private void loadIndex() {
+    private void loadIndex(String s) {
         Dataset<Row> wordDF;
         // TODO: Change to HDFS for cluster
 //    try {
@@ -44,7 +44,8 @@ public class SearchService {
 
         JavaRDD<Word> wordRDD = spark.read()
 //      .textFile("./output/")
-            .textFile("/user/cs132g4/output8/part-r-00023")
+            // "/user/cs132g4/output8/part-r-00023"
+            .textFile(s)
             .javaRDD()
             .map(line -> {
                 String[] parts = line.split("\\s+");
@@ -118,7 +119,7 @@ public class SearchService {
     }
 
     public static void main(String[] args) {
-        SearchService searcher = new SearchService();
+        SearchService searcher = new SearchService(args[1]);
         searcher.search(args[0]);
         searcher.stop();
     }
