@@ -45,8 +45,8 @@ public class SearchService {
 
 
     JavaRDD<Word> wordRDD = spark.read()
-//      .textFile("./output/part-r-00000")
-      .textFile("hdfs://user/cs132g4/output7")
+//      .textFile("./output/")
+      .textFile("hdfs://user/cs132g4/output8")
       .javaRDD()
       .map(line -> {
         String[] parts = line.split("\\s+");
@@ -105,13 +105,14 @@ public class SearchService {
       }
     }
 
-    result.forEach(r -> {
-      try {
-        System.out.println(getArticle(Integer.valueOf(r)));
-      } catch (IOException | InterruptedException e) {
-        e.printStackTrace();
-      }
-    });
+//    result.forEach(r -> {
+//      try {
+//        System.out.println(getArticle(Integer.valueOf(r)));
+//      } catch (IOException | InterruptedException e) {
+//        e.printStackTrace();
+//      }
+//    });
+    result.forEach(System.out::println);
   }
 
   private void stop() {
