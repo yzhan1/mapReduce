@@ -23,14 +23,12 @@ import java.util.*;
  */
 //@Service
 public class SearchService {
-//    private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
-    private JavaRDD<Word> wordRDD;
-
     private SparkConf conf = new SparkConf().setAppName("searcher").set("spark.executor.instances", "8");
     private JavaSparkContext sc = new JavaSparkContext(conf);
+    private JavaRDD<Word> wordRDD;
 
     public SearchService(String s) {
-        loadIndex(s);
+//        loadIndex(s);
     }
 
     private void loadIndex(String s) {
@@ -44,11 +42,7 @@ public class SearchService {
 //    }
         System.out.println("Loading from file");
 
-        wordRDD = sc.textFile(s)
-            .map(line -> {
-                String[] parts = line.split("\\s+");
-                return new Word(parts[0], parts[1]);
-            }).cache();
+
     }
 
     private Article getArticle(int id) throws IOException, InterruptedException {
@@ -58,7 +52,7 @@ public class SearchService {
         return new Article(id, reader.readLine(), reader.readLine(), reader.readLine());
     }
 
-    public void search(String terms) {
+    public void search(String terms, String path) {
         String[] strings = terms.split("\\s+");
         StringBuilder query = new StringBuilder();
         for (int i = 0; i < strings.length; i++) {
@@ -74,35 +68,46 @@ public class SearchService {
 
 //        List<Row> queryResult = spark.sql(query.toString()).collectAsList();
 
-        List<Word> queryResult = wordRDD.filter(word -> words.contains(word.getWord())).collect();
+        wordRDD = sc.textFile(path)
+            .map(line -> {
+                String[] parts = line.split("\\s+");
+                return new Word(parts[0], parts[1]);
+            })
+            .filter(word -> words.contains(word.getWord()));
 
-        List<Set<String>> map = new ArrayList<>();
+//        wordRDD.saveAsTextFile("/result");
 
-        queryResult.forEach(word -> {
-            String[] positions = word.getPositions().split(";");
-            Set<String> appearances = new HashSet<>();
-            for (String pos : positions) {
-                String docId = pos.substring(0, pos.indexOf("."));
-                appearances.add(docId);
-            }
-            map.add(appearances);
-        });
+//        List<Word> queryResult = wordRDD.filter(word -> words.contains(word.getWord())).collect();
+//
+//        List<Set<String>> map = new ArrayList<>();
+//
+//        queryResult.forEach(word -> {
+//            String[] positions = word.getPositions().split(";");
+//            Set<String> appearances = new HashSet<>();
+//            for (String pos : positions) {
+//                String docId = pos.substring(0, pos.indexOf("."));
+//                appearances.add(docId);
+//            }
+//            map.add(appearances);
+//        });
+//
+//        Set<String> result = map.get(map.size() - 1);
+//        int positionCount = map.size() - 2;
+//        for (int i = 1; i < strings.length; i++) {
+//            String current = strings[i++];
+//            if ("&".equals(current)) {
+//                result = Sets.intersection(result, map.get(positionCount--));
+//            } else if ("|".equals(current)) {
+//                result = Sets.union(result, map.get(positionCount--));
+//            } else if ("-".equals(current)) {
+//                result = Sets.difference(result, map.get(positionCount--));
+//            } else {
+//                result = Sets.union(result, map.get(positionCount--));
+//                i--;
+//            }
+//        }
 
-        Set<String> result = map.get(map.size() - 1);
-        int positionCount = map.size() - 2;
-        for (int i = 1; i < strings.length; i++) {
-            String current = strings[i++];
-            if ("&".equals(current)) {
-                result = Sets.intersection(result, map.get(positionCount--));
-            } else if ("|".equals(current)) {
-                result = Sets.union(result, map.get(positionCount--));
-            } else if ("-".equals(current)) {
-                result = Sets.difference(result, map.get(positionCount--));
-            } else {
-                result = Sets.union(result, map.get(positionCount--));
-                i--;
-            }
-        }
+
 
 //    result.forEach(r -> {
 //      try {
@@ -111,7 +116,7 @@ public class SearchService {
 //        e.printStackTrace();
 //      }
 //    });
-        result.forEach(System.out::println);
+//        result.forEach(System.out::println);
     }
 
     private void stop() {
@@ -119,8 +124,11 @@ public class SearchService {
     }
 
     public static void main(String[] args) {
+        for (String s : args) {
+            System.out.println(s);
+        }
         SearchService searcher = new SearchService(args[1]);
-        searcher.search(args[0]);
+        searcher.search(args[0], args[1]);
         searcher.stop();
     }
 }
