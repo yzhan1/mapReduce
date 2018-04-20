@@ -11,14 +11,17 @@ import org.apache.spark.sql.*;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 
 /**
  * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
  * Final Project
  */
-@Service
+//@Service
 public class SearchService {
   private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
   private JavaSparkContext sc = JavaSparkContext.fromSparkContext(spark.sparkContext());
@@ -26,7 +29,6 @@ public class SearchService {
 
   public SearchService() {
     loadIndex();
-    loadArticles();
   }
 
   private void loadIndex() {
@@ -55,27 +57,11 @@ public class SearchService {
     wordDF.createOrReplaceTempView("words");
   }
 
-  private void loadArticles() {
-    // TODO: Change to HDFS for cluster
-//    if ((new File("./articles")).exists()) {
-//      System.out.println("Loading article from saved file");
-//      articleRDD = JavaPairRDD.fromJavaRDD(sc.objectFile("./articles"));
-//    } else {
-//
-//    }
-    System.out.println("Loading article from csv file");
-    articleRDD = spark.read()
-//      .textFile("./data/wiki_00.csv")
-      .textFile("hdfs://data/wiki_csv")
-      .javaRDD()
-      .map(line -> line.split(","))
-      .mapToPair(s -> new Tuple2<>(Integer.valueOf(s[0]), new Article(Integer.valueOf(s[0]), s[1], s[2], s[3]))).cache();
-
-    // articleRDD.saveAsObjectFile("./articles");
-  }
-
-  private Article getArticle(int id) {
-    return articleRDD.cache().lookup(id).get(0);
+  private Article getArticle(int id) throws IOException, InterruptedException {
+    Process p = Runtime.getRuntime().exec("/class/cs132/get_wiki_by_id " + id);
+    p.waitFor();
+    BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+    return new Article(id, reader.readLine(), reader.readLine(), reader.readLine());
   }
 
   public void search(String terms) {
@@ -119,16 +105,22 @@ public class SearchService {
       }
     }
 
-    result.forEach(r -> System.out.println(getArticle(Integer.valueOf(r))));
+    result.forEach(r -> {
+      try {
+        System.out.println(getArticle(Integer.valueOf(r)));
+      } catch (IOException | InterruptedException e) {
+        e.printStackTrace();
+      }
+    });
   }
 
-  public void stop() {
+  private void stop() {
     spark.stop();
   }
 
   public static void main(String[] args) {
     SearchService searcher = new SearchService();
-    searcher.search("abrar & ababa | aaa");
+    searcher.search(args[0]);
     searcher.stop();
   }
 }

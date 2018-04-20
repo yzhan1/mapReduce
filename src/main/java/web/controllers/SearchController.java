@@ -1,26 +1,27 @@
 package web.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import search.SearchService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
  * Final Project
  */
-@RestController
+@Controller
 public class SearchController {
-  @Autowired
-  SearchService service;
+//  @Autowired
+//  SearchService service;
 
-  @RequestMapping("/")
+  @GetMapping(value = "/")
   public String index() {
-    return "Index page";
+    return "index";
   }
 
-  @RequestMapping("/search")
-  public String search() {
-    return "Search path";
+  @GetMapping(value = "/search")
+  public String search(@RequestParam("query") String query, Model model) {
+//    service.search(query);
+    model.addAttribute("query", query);
+    return "index";
   }
 }

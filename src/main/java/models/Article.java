@@ -12,11 +12,7 @@ public class Article implements Serializable {
   private String title;
   private String content;
 
-  public Article() {
-  }
-
   public Article(int id, String url, String title, String content) {
-    this();
     setId(id);
     setContent(content);
     setTitle(title);
