@@ -4,6 +4,8 @@ import com.google.common.collect.Sets;
 import mapreduce.WordMapper;
 import models.Article;
 import models.Word;
+
+import org.apache.hadoop.io.Text;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -27,7 +29,7 @@ import java.util.*;
 public class SearchService {
     private SparkConf conf = new SparkConf().setAppName("searcher").set("spark.executor.instances", "8");
     private JavaSparkContext sc = new JavaSparkContext(conf);
-    private JavaRDD<String> wordRDD;
+    private JavaRDD<Word> wordRDD;
 
     public SearchService(String s) {
 //        loadIndex(s);
@@ -65,48 +67,53 @@ public class SearchService {
         String[] arr = query.toString().split(" ");
         List<String> words = Arrays.asList(arr);
 
-//        List<Row> queryResult = spark.sql(query.toString()).collectAsList();
+//      List<Row> queryResult = spark.sql(query.toString()).collectAsList();
 
-        wordRDD = sc.textFile(path)
-            .map(line -> {
-                String[] parts = line.split("\\s+");
-                return new Word(parts[0], parts[1]);
-            })
-            .filter(word -> words.contains(word.getWord()))
-            .map(Word::toString);
+//        wordRDD = sc.textFile(path)
+//            .map(line -> {
+//                String[] parts = line.split("\\s+");
+//                return new Word(parts[0], parts[1]);
+//            })
+//            .filter(word -> words.contains(word.getWord()))
+//            .map(word -> new Text(word.toString()));
+//        
+//        wordRDD.coalesce(1).saveAsTextFile("/user/cs132g4/search_result");
 
-        wordRDD.saveAsTextFile("/user/cs132g4/search_result");
+        List<Word> queryResult = wordRDD.filter(word -> words.contains(word.getWord())).collect();
 
-//        List<Word> queryResult = wordRDD.filter(word -> words.contains(word.getWord())).collect();
-//
-//        List<Set<String>> map = new ArrayList<>();
-//
-//        queryResult.forEach(word -> {
-//            String[] positions = word.getPositions().split(";");
-//            Set<String> appearances = new HashSet<>();
-//            for (String pos : positions) {
-//                String docId = pos.substring(0, pos.indexOf("."));
-//                appearances.add(docId);
-//            }
-//            map.add(appearances);
+        List<Set<String>> map = new ArrayList<>();
+
+        queryResult.forEach(word -> {
+            String[] positions = word.getPositions().split(";");
+            Set<String> appearances = new HashSet<>();
+            for (String pos : positions) {
+                String docId = pos.substring(0, pos.indexOf("."));
+                appearances.add(docId);
+            }
+            map.add(appearances);
+        });
+
+        Set<String> result = map.get(map.size() - 1);
+        int positionCount = map.size() - 2;
+        for (int i = 1; i < strings.length; i++) {
+            String current = strings[i++];
+            if ("&".equals(current)) {
+                result = Sets.intersection(result, map.get(positionCount--));
+            } else if ("|".equals(current)) {
+                result = Sets.union(result, map.get(positionCount--));
+            } else if ("-".equals(current)) {
+                result = Sets.difference(result, map.get(positionCount--));
+            } else {
+                result = Sets.union(result, map.get(positionCount--));
+                i--;
+            }
+        }
+        
+//        Set<Text> text_result = new HashSet<Text>();
+//        result.forEach(location -> {
+//        		text_result.add(new Text(location));
 //        });
-//
-//        Set<String> result = map.get(map.size() - 1);
-//        int positionCount = map.size() - 2;
-//        for (int i = 1; i < strings.length; i++) {
-//            String current = strings[i++];
-//            if ("&".equals(current)) {
-//                result = Sets.intersection(result, map.get(positionCount--));
-//            } else if ("|".equals(current)) {
-//                result = Sets.union(result, map.get(positionCount--));
-//            } else if ("-".equals(current)) {
-//                result = Sets.difference(result, map.get(positionCount--));
-//            } else {
-//                result = Sets.union(result, map.get(positionCount--));
-//                i--;
-//            }
-//        }
-
+//        sc.parallelize(Arrays.asList(text_result)).saveAsTextFile("/user/cs132g4/search_result");
 
 
 //    result.forEach(r -> {
@@ -129,7 +136,10 @@ public class SearchService {
             logger.error(s);
         }
         SearchService searcher = new SearchService(args[1]);
-        searcher.search(args[0], args[1]);
+        for(int i = 1; i<args.length-1; i++) {
+        		args[0] = args[0] + " " + args[i];
+        }
+        searcher.search(args[0], args[args.length-1]);
         searcher.stop();
     }
 }
