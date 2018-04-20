@@ -8,6 +8,8 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
 
@@ -124,8 +126,9 @@ public class SearchService {
     }
 
     public static void main(String[] args) {
+        Logger logger = LoggerFactory.getLogger("app logger");
         for (String s : args) {
-            System.out.println(s);
+            logger.error(s);
         }
         SearchService searcher = new SearchService(args[1]);
         searcher.search(args[0], args[1]);
