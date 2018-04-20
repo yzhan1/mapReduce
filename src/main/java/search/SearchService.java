@@ -41,6 +41,7 @@ public class SearchService {
 //    }
     System.out.println("Loading from file");
 
+
     JavaRDD<Word> wordRDD = spark.read()
 //      .textFile("./output/part-r-00000")
       .textFile("hdfs://user/cs132g4/output7")
