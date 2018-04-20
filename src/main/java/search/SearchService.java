@@ -4,7 +4,9 @@ import com.google.common.collect.Sets;
 import mapreduce.WordMapper;
 import models.Article;
 import models.Word;
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.*;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
@@ -21,8 +23,11 @@ import java.util.*;
  */
 //@Service
 public class SearchService {
-    private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
+//    private SparkSession spark = SparkSession.builder().appName("cs132g4-WordSearcher").master("local[4]").getOrCreate();
     private JavaRDD<Word> wordRDD;
+
+    private SparkConf conf = new SparkConf().setAppName("searcher").set("spark.executor.instances", "8");
+    private JavaSparkContext sc = new JavaSparkContext(conf);
 
     public SearchService(String s) {
         loadIndex(s);
@@ -39,9 +44,7 @@ public class SearchService {
 //    }
         System.out.println("Loading from file");
 
-        wordRDD = spark.read()
-            .textFile(s)
-            .javaRDD()
+        wordRDD = sc.textFile(s)
             .map(line -> {
                 String[] parts = line.split("\\s+");
                 return new Word(parts[0], parts[1]);
@@ -112,7 +115,7 @@ public class SearchService {
     }
 
     private void stop() {
-        spark.stop();
+        sc.stop();
     }
 
     public static void main(String[] args) {
