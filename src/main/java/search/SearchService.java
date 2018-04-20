@@ -77,7 +77,7 @@ public class SearchService {
             })
             .filter(word -> words.contains(word.getWord()));
 
-//        wordRDD.saveAsTextFile("/result");
+        wordRDD.saveAsTextFile("/user/cs132g4/search_result");
 
 //        List<Word> queryResult = wordRDD.filter(word -> words.contains(word.getWord())).collect();
 //
