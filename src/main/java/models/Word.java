@@ -34,4 +34,12 @@ public class Word implements Serializable {
     public void setPositions(String a) {
         positions = a;
     }
+
+    @Override
+    public String toString() {
+        return "Word{" +
+            "word='" + word + '\'' +
+            ", positions='" + positions + '\'' +
+            '}';
+    }
 }

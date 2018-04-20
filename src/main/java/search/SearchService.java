@@ -27,14 +27,13 @@ import java.util.*;
 public class SearchService {
     private SparkConf conf = new SparkConf().setAppName("searcher").set("spark.executor.instances", "8");
     private JavaSparkContext sc = new JavaSparkContext(conf);
-    private JavaRDD<Word> wordRDD;
+    private JavaRDD<String> wordRDD;
 
     public SearchService(String s) {
 //        loadIndex(s);
     }
 
     private void loadIndex(String s) {
-        // TODO: Change to HDFS for cluster
 //    try {
 //      System.out.println("Reading from saved file");
 //      wordDF = spark.read().parquet("./words.parquet").cache();
@@ -43,8 +42,6 @@ public class SearchService {
 //      wordDF.write().parquet("./words.parquet");
 //    }
         System.out.println("Loading from file");
-
-
     }
 
     private Article getArticle(int id) throws IOException, InterruptedException {
@@ -75,7 +72,8 @@ public class SearchService {
                 String[] parts = line.split("\\s+");
                 return new Word(parts[0], parts[1]);
             })
-            .filter(word -> words.contains(word.getWord()));
+            .filter(word -> words.contains(word.getWord()))
+            .map(Word::toString);
 
         wordRDD.saveAsTextFile("/user/cs132g4/search_result");
 
