@@ -4,17 +4,14 @@ import com.google.common.collect.Sets;
 import mapreduce.WordMapper;
 import models.Article;
 import models.Word;
-import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
+import secondarysort.WikiPartitioner;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -23,26 +20,12 @@ import java.util.*;
  * @author Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
  * Final Project
  */
-//@Service
+@Service
 public class SearchService {
-    private SparkConf conf = new SparkConf().setAppName("searcher").set("spark.executor.instances", "8");
-    private JavaSparkContext sc = new JavaSparkContext(conf);
-    private JavaRDD<String> wordRDD;
+    @Autowired
+    private JavaSparkContext sc;
 
-    public SearchService(String s) {
-//        loadIndex(s);
-    }
-
-    private void loadIndex(String s) {
-//    try {
-//      System.out.println("Reading from saved file");
-//      wordDF = spark.read().parquet("./words.parquet").cache();
-//    } catch (Exception e) {
-//
-//      wordDF.write().parquet("./words.parquet");
-//    }
-        System.out.println("Loading from file");
-    }
+    public SearchService() { }
 
     private Article getArticle(int id) throws IOException, InterruptedException {
         Process p = Runtime.getRuntime().exec("/class/cs132/get_wiki_by_id " + id);
@@ -51,34 +34,23 @@ public class SearchService {
         return new Article(id, reader.readLine(), reader.readLine(), reader.readLine());
     }
 
-    public void search(String terms, String path) {
+    public List<String> search(String terms) {
         String[] strings = terms.split("\\s+");
-        StringBuilder query = new StringBuilder();
-        for (int i = 0; i < strings.length; i++) {
-            String s = WordMapper.stem(strings[i].toLowerCase().trim());
+        List<String> words = new ArrayList<>();
+        for (String string : strings) {
+            String s = WordMapper.stem(string.toLowerCase().trim());
 
             if (s.equals("&") || s.equals("|") || s.equals("-")) continue;
-            if (i != 0) query.append(" ");
-            query.append(s);
+            words.add(s);
         }
 
-        String[] arr = query.toString().split(" ");
-        List<String> words = Arrays.asList(arr);
+        List<String> queryResult = new ArrayList<>();
+        words.forEach(word -> {
+            List<String> result = sc.textFile(getFile(word)).filter(line -> words.contains(line.split("\\s+")[0])).cache().collect();
+            if (!result.isEmpty()) queryResult.add(result.get(0));
+        });
 
-//        List<Row> queryResult = spark.sql(query.toString()).collectAsList();
-
-        wordRDD = sc.textFile(path)
-            .map(line -> {
-                String[] parts = line.split("\\s+");
-                return new Word(parts[0], parts[1]);
-            })
-            .filter(word -> words.contains(word.getWord()))
-            .map(Word::toString);
-
-        wordRDD.saveAsTextFile("/user/cs132g4/search_result");
-
-//        List<Word> queryResult = wordRDD.filter(word -> words.contains(word.getWord())).collect();
-//
+        return queryResult;
 //        List<Set<String>> map = new ArrayList<>();
 //
 //        queryResult.forEach(word -> {
@@ -106,17 +78,20 @@ public class SearchService {
 //                i--;
 //            }
 //        }
+    }
 
+    private String getFile(String word) {
+        int hash = WikiPartitioner.getHash(word, 676);
+        return "./output/part-r-00" + padZeroes(hash);
+    }
 
-
-//    result.forEach(r -> {
-//      try {
-//        System.out.println(getArticle(Integer.valueOf(r)));
-//      } catch (IOException | InterruptedException e) {
-//        e.printStackTrace();
-//      }
-//    });
-//        result.forEach(System.out::println);
+    private String padZeroes(int num) {
+        String n = String.valueOf(num);
+        StringBuilder sb = new StringBuilder();
+        for (int i = n.length(); i < 3; i++) {
+            sb.append("0");
+        }
+        return sb.append(n).toString();
     }
 
     private void stop() {
@@ -124,12 +99,8 @@ public class SearchService {
     }
 
     public static void main(String[] args) {
-        Logger logger = LoggerFactory.getLogger("app logger");
-        for (String s : args) {
-            logger.error(s);
-        }
-        SearchService searcher = new SearchService(args[1]);
-        searcher.search(args[0], args[1]);
+        SearchService searcher = new SearchService();
+        searcher.search(args[0]);
         searcher.stop();
     }
 }

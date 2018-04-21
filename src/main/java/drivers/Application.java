@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
  * Final Project
  */
 @SpringBootApplication
-@ComponentScan(basePackages = {"web.controllers", "search", "drivers"})
+@ComponentScan(basePackages = {"web.controllers", "search", "drivers", "configuration"})
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
