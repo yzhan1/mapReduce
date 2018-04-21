@@ -4,11 +4,13 @@ import com.google.common.collect.Sets;
 import mapreduce.WordMapper;
 import models.Article;
 import models.Word;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.logicng.formulas.Formula;
+import org.logicng.formulas.FormulaFactory;
+import org.logicng.io.parsers.ParserException;
+import org.logicng.io.parsers.PropositionalParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import scala.Tuple2;
 import secondarysort.WikiPartitioner;
 
 import java.io.BufferedReader;
@@ -24,23 +26,19 @@ import java.util.*;
 public class SearchService {
     @Autowired
     private JavaSparkContext sc;
+    private final FormulaFactory f = new FormulaFactory();
+    private final PropositionalParser p = new PropositionalParser(f);
 
     public SearchService() { }
 
-    private Article getArticle(int id) throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec("/class/cs132/get_wiki_by_id " + id);
-        p.waitFor();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        return new Article(id, reader.readLine(), reader.readLine(), reader.readLine());
-    }
-
-    public List<String> search(String terms) {
+    public List<String> search(String terms) throws ParserException {
+//        Formula cnf = p.parse(terms).cnf();
         String[] strings = terms.split("\\s+");
         List<String> words = new ArrayList<>();
         for (String string : strings) {
             String s = WordMapper.stem(string.toLowerCase().trim());
 
-            if (s.equals("&") || s.equals("|") || s.equals("-")) continue;
+            if (s.equals("&") || s.equals("|") || s.equals("~")) continue;
             words.add(s);
         }
 
@@ -80,16 +78,19 @@ public class SearchService {
 //        }
     }
 
-    private String getFile(String word) {
-        int hash = WikiPartitioner.getHash(word, 676);
-        return "./output/part-r-00" + padZeroes(hash);
+    private Article getArticle(int id) throws IOException, InterruptedException {
+        Process p = Runtime.getRuntime().exec("/class/cs132/get_wiki_by_id " + id);
+        p.waitFor();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        return new Article(id, reader.readLine(), reader.readLine(), reader.readLine());
     }
 
-    private String padZeroes(int num) {
-        String n = String.valueOf(num);
-        StringBuilder sb = new StringBuilder();
+    private String getFile(String word) {
+        StringBuilder sb = new StringBuilder("./output/part-r-00");
+        int hash = WikiPartitioner.getHash(word, 676);
+        String n = String.valueOf(hash);
         for (int i = n.length(); i < 3; i++) {
-            sb.append("0");
+            sb.append('0');
         }
         return sb.append(n).toString();
     }
@@ -98,7 +99,7 @@ public class SearchService {
         sc.stop();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParserException {
         SearchService searcher = new SearchService();
         searcher.search(args[0]);
         searcher.stop();

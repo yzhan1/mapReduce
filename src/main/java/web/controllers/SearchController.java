@@ -1,5 +1,6 @@
 package web.controllers;
 
+import org.logicng.io.parsers.ParserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +22,7 @@ public class SearchController {
     }
 
     @GetMapping(value = "/search")
-    public String search(@RequestParam("query") String query, Model model) {
+    public String search(@RequestParam("query") String query, Model model) throws ParserException {
         service.search(query).forEach(System.out::println);
         model.addAttribute("query", query);
         return "index";

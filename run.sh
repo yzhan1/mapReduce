@@ -2,7 +2,7 @@ if [ "$1" = "mr" ]
 then
     rm -rf ./output && \
     mvn clean package && \
-    ../../hadoop/bin/yarn jar ./target/cs132g4-0.7.jar "drivers.Driver" ./data/wiki_00.csv ./output
+    ../../hadoop/bin/yarn jar ./target/cs132g4-0.7.jar ./data/wiki_00.csv ./output
 elif [ "$1" = "spark" ]
 then
     mvn clean package && \

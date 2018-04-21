@@ -1,10 +1,5 @@
 # Wikipedia Search Project
 
-### Group 
-cs132g4 (Group number: 4)
-
-### Group name
-Network Beasts
-
-### Group members
-Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
+### Group Info
++ Name: Network Beasts (cs132g4)
++ Members: Shu Lin Chan, Jonathan Maeda, James Wang, Yaoming Zhan
