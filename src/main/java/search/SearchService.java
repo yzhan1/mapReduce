@@ -5,7 +5,6 @@ import mapreduce.WordMapper;
 import models.Article;
 import models.Word;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.io.parsers.ParserException;
 import org.logicng.io.parsers.PropositionalParser;
@@ -31,8 +30,7 @@ public class SearchService {
 
     public SearchService() { }
 
-    public List<Article> search(String terms) throws ParserException {
-//        Formula cnf = p.parse(terms).cnf();
+    public List<Article> search(String terms) {
         String[] strings = terms.split("\\s+");
         List<String> words = new ArrayList<>();
         for (String string : strings) {
@@ -42,47 +40,48 @@ public class SearchService {
             words.add(s);
         }
 
-        List<Article> queryResult = new ArrayList<>();
+        List<Set<String>> map = new ArrayList<>();
+
         words.forEach(word -> {
-            List<String> result = sc.textFile(getFile(word)).filter(line -> words.contains(line.split("\\s+")[0])).cache().collect();
-            if (!result.isEmpty()) {
-                String[] split = result.get(0).split("\\s+");
-                String[] appearances = split[1].split(";");
-                for (String appearance : appearances) {
-                    String[] current = appearance.split(("\\."));
-                    queryResult.add(getArticle(Integer.valueOf(current[0])));
+            List<Word> result = sc.textFile(getFile(word)).filter(line -> words.contains(line.split("\\s+")[0]))
+                .map(line -> {
+                    String[] split = line.split("\\s+");
+                    return new Word(split[0], split[1]);
+                }).collect();
+
+            result.forEach(w -> {
+                String[] positions = w.getPositions().split(";");
+                Set<String> appearances = new HashSet<>();
+                for (String pos : positions) {
+                    String docId = pos.substring(0, pos.indexOf("."));
+                    appearances.add(docId);
                 }
-            }
+                map.add(appearances);
+            });
         });
 
-        return queryResult;
-//        List<Set<String>> map = new ArrayList<>();
-//
-//        queryResult.forEach(word -> {
-//            String[] positions = word.getPositions().split(";");
-//            Set<String> appearances = new HashSet<>();
-//            for (String pos : positions) {
-//                String docId = pos.substring(0, pos.indexOf("."));
-//                appearances.add(docId);
-//            }
-//            map.add(appearances);
-//        });
-//
-//        Set<String> result = map.get(map.size() - 1);
-//        int positionCount = map.size() - 2;
-//        for (int i = 1; i < strings.length; i++) {
-//            String current = strings[i++];
-//            if ("&".equals(current)) {
-//                result = Sets.intersection(result, map.get(positionCount--));
-//            } else if ("|".equals(current)) {
-//                result = Sets.union(result, map.get(positionCount--));
-//            } else if ("~".equals(current)) {
-//                result = Sets.difference(result, map.get(positionCount--));
-//            } else {
-//                result = Sets.union(result, map.get(positionCount--));
-//                i--;
-//            }
-//        }
+        Set<String> result = map.get(map.size() - 1);
+        int positionCount = map.size() - 2;
+        for (int i = 1; i < strings.length; i++) {
+            String current = strings[i++];
+            if ("&".equals(current)) {
+                result = Sets.intersection(result, map.get(positionCount--));
+            } else if ("|".equals(current)) {
+                result = Sets.union(result, map.get(positionCount--));
+            } else if ("~".equals(current)) {
+                result = Sets.difference(result, map.get(positionCount--));
+            } else {
+                result = Sets.union(result, map.get(positionCount--));
+                i--;
+            }
+        }
+
+        List<Article> articleList = new ArrayList<>();
+        for (String s : result) {
+            System.out.println(s);
+            articleList.add(getArticle(Integer.valueOf(s)));
+        }
+        return articleList;
     }
 
 //    private Article getArticle(int id) throws IOException, InterruptedException {
