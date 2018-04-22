@@ -1,13 +1,13 @@
 package web.controllers;
 
 import models.Article;
-import org.logicng.io.parsers.ParserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import search.SearchService;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -25,7 +25,7 @@ public class SearchController {
     }
 
     @GetMapping(value = "/search")
-    public String search(@RequestParam("query") String query, Model model) throws ParserException {
+    public String search(@RequestParam("query") String query, Model model) throws IOException, InterruptedException {
         List<Article> results = service.search(query);
         model.addAttribute("results", results);
         return "index";

@@ -20,16 +20,19 @@
                 </span>
             </div>
         </form>
+        <hr class="my-4">
+        <p class="lead">Example query: "A & B | C ~ D" (parenthesis not supported)</p>
     </div>
 </div>
 
 <div class="container">
-    <div class="list-group" th:each="result : ${results}">
-        <a th:href="${result.getTitle()}" class="list-group-item list-group-item-action flex-column align-items-start"></a>
-        <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1" th:text="${result.getTitle()}"></h5>
-        </div>
-        <p class="mb-1" th:text="${result.getContent()}"></p>
+    <div class="list-group" style="padding-bottom: 50px">
+        <a th:each="result : ${results}" th:href="${result.getUrl()}" target="_blank" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1" th:text="${result.getTitle()}"></h5>
+            </div>
+            <p class="mb-1" th:text="${result.getContent()}"></p>
+        </a>
     </div>
 </div>
 
