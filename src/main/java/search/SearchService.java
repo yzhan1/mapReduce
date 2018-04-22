@@ -69,7 +69,7 @@ public class SearchService {
 //                result = Sets.intersection(result, map.get(positionCount--));
 //            } else if ("|".equals(current)) {
 //                result = Sets.union(result, map.get(positionCount--));
-//            } else if ("-".equals(current)) {
+//            } else if ("~".equals(current)) {
 //                result = Sets.difference(result, map.get(positionCount--));
 //            } else {
 //                result = Sets.union(result, map.get(positionCount--));

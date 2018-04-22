@@ -10,9 +10,7 @@ import writable.WikiWritable;
 public class WikiPartitioner extends Partitioner<WikiWritable, WikiWritable> {
     @Override
     public int getPartition(WikiWritable wikiWritable, WikiWritable wikiWritable2, int i) {
-        int hash = wikiWritable.getWord().charAt(0) - 'a';
-        return Math.abs(hash % i);
-//        return getHash(wikiWritable.getWord().toString(), i);
+        return getHash(wikiWritable.getWord().toString(), i);
     }
 
     public static int getHash(String word, int mod) {
