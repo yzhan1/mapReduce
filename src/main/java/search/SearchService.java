@@ -31,7 +31,7 @@ public class SearchService {
 
     public SearchService() { }
 
-    public List<String> search(String terms) throws ParserException {
+    public List<Article> search(String terms) throws ParserException {
 //        Formula cnf = p.parse(terms).cnf();
         String[] strings = terms.split("\\s+");
         List<String> words = new ArrayList<>();
@@ -42,10 +42,19 @@ public class SearchService {
             words.add(s);
         }
 
-        List<String> queryResult = new ArrayList<>();
+        List<Article> queryResult = new ArrayList<>();
         words.forEach(word -> {
             List<String> result = sc.textFile(getFile(word)).filter(line -> words.contains(line.split("\\s+")[0])).cache().collect();
-            if (!result.isEmpty()) queryResult.add(result.get(0));
+            if (!result.isEmpty()) {
+                String line = result.get(0);
+                String[] split = line.split("\\s+");
+                String allAppearance = split[1];
+                String[] appearances = allAppearance.split(";");
+                for (String appearance : appearances) {
+                    String[] current = appearance.split(("\\."));
+                    queryResult.add(getArticle(Integer.valueOf(current[0])));
+                }
+            }
         });
 
         return queryResult;
@@ -69,7 +78,7 @@ public class SearchService {
 //                result = Sets.intersection(result, map.get(positionCount--));
 //            } else if ("|".equals(current)) {
 //                result = Sets.union(result, map.get(positionCount--));
-//            } else if ("-".equals(current)) {
+//            } else if ("~".equals(current)) {
 //                result = Sets.difference(result, map.get(positionCount--));
 //            } else {
 //                result = Sets.union(result, map.get(positionCount--));
@@ -78,15 +87,19 @@ public class SearchService {
 //        }
     }
 
-    private Article getArticle(int id) throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec("/class/cs132/get_wiki_by_id " + id);
-        p.waitFor();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        return new Article(id, reader.readLine(), reader.readLine(), reader.readLine());
+//    private Article getArticle(int id) throws IOException, InterruptedException {
+//        Process p = Runtime.getRuntime().exec("/class/cs132/get_wiki_by_id " + id);
+//        p.waitFor();
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//        return new Article(id, reader.readLine(), reader.readLine(), reader.readLine());
+//    }
+
+    private Article getArticle(int id) {
+        return new Article(id, "http://www.google.com", "Title", "Content");
     }
 
     private String getFile(String word) {
-        StringBuilder sb = new StringBuilder("./output/part-r-00");
+        StringBuilder sb = new StringBuilder("./output10/part-r-00");
         int hash = WikiPartitioner.getHash(word, 676);
         String n = String.valueOf(hash);
         for (int i = n.length(); i < 3; i++) {

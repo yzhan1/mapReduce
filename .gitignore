@@ -14,3 +14,4 @@ data/
 spark-warehouse/
 words.parquet/
 articles/
+/output10/*
