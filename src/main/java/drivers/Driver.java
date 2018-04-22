@@ -25,7 +25,8 @@ public class Driver {
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, "cs132g4");
 
-        job.setNumReduceTasks(676);
+//        job.setNumReduceTasks(676);
+        job.setNumReduceTasks(26);
         TextInputFormat.addInputPath(job, wiki);
         TextOutputFormat.setOutputPath(job, out);
 
