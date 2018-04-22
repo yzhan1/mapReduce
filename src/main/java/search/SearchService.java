@@ -46,10 +46,8 @@ public class SearchService {
         words.forEach(word -> {
             List<String> result = sc.textFile(getFile(word)).filter(line -> words.contains(line.split("\\s+")[0])).cache().collect();
             if (!result.isEmpty()) {
-                String line = result.get(0);
-                String[] split = line.split("\\s+");
-                String allAppearance = split[1];
-                String[] appearances = allAppearance.split(";");
+                String[] split = result.get(0).split("\\s+");
+                String[] appearances = split[1].split(";");
                 for (String appearance : appearances) {
                     String[] current = appearance.split(("\\."));
                     queryResult.add(getArticle(Integer.valueOf(current[0])));
