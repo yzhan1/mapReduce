@@ -37,7 +37,7 @@ public class SearchService {
 
         List<Set<String>> map = new ArrayList<>();
 
-        words.forEach(word -> sc.textFile(getFile(word)).filter(line -> words.contains(line.split("\\s+")[0]))
+        words.forEach(word -> sc.textFile(getFile(word)).cache().filter(line -> words.contains(line.split("\\s+")[0]))
             .map(line -> {
                 String[] split = line.split("\\s+");
                 return new Word(split[0], split[1]);
@@ -89,7 +89,7 @@ public class SearchService {
 //    }
 
     private String getFile(String word) {
-        StringBuilder sb = new StringBuilder("hdfs://user/cs132g4/output10/part-r-00");
+        StringBuilder sb = new StringBuilder("hdfs:///user/cs132g4/output10/part-r-00");
         int hash = WikiPartitioner.getHash(word, 676);
         String n = String.valueOf(hash);
         for (int i = n.length(); i < 3; i++) {
