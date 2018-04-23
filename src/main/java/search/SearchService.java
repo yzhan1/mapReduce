@@ -89,7 +89,7 @@ public class SearchService {
 //    }
 
     private String getFile(String word) {
-        StringBuilder sb = new StringBuilder("hdfs:///user/cs132g4/output10/part-r-00");
+        StringBuilder sb = new StringBuilder("/user/cs132g4/output10/part-r-00");
         int hash = WikiPartitioner.getHash(word, 676);
         String n = String.valueOf(hash);
         for (int i = n.length(); i < 3; i++) {
