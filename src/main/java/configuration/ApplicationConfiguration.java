@@ -13,7 +13,11 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationConfiguration {
     @Bean
     public SparkConf sparkConf() {
-        return new SparkConf().setAppName("cs132g4searcher").setMaster(System.getenv("MASTER")).set("spark.executor.instances", "8");
+        return new SparkConf()
+            .setAppName("cs132g4searcher")
+            .setMaster(System.getenv("MASTER"))
+            .set("spark.executor.instances", "8")
+            .set("spark.submit.deployMode", "cluster");
     }
 
     @Bean
