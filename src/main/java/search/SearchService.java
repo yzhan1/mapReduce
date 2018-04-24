@@ -85,8 +85,11 @@ public class SearchService {
     private Article getArticle(int id) throws IOException, InterruptedException {
     	System.out.println("Getting Article: " + id);
         Process p = Runtime.getRuntime().exec("/class/cs132/get_wiki_by_id " + id);
+        System.out.println("waiting for buffer...");
         p.waitFor();
+        System.out.println("waiting complete");
         BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        System.out.println("Leaving getArticle()");
         return new Article(id, reader.readLine(), reader.readLine(), reader.readLine());
     }
 
