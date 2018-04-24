@@ -70,18 +70,20 @@ public class SearchService {
             }
         }
         System.out.println("Completed Set Combining");
+        System.out.println("Articles to get: " + result.size());
+        int count = 1;
         List<Article> articleList = new ArrayList<>();
         for (String s : result) {
             System.out.println(s);
+            System.out.println(count++);
             articleList.add(getArticle(Integer.valueOf(s)));
         }
         System.out.println("Completed Getting Articles");
-        System.out.println(articleList.size());
         return articleList;
     }
 
     private Article getArticle(int id) throws IOException, InterruptedException {
-    	System.out.println("Getting Article" + id);
+    	System.out.println("Getting Article: " + id);
         Process p = Runtime.getRuntime().exec("/class/cs132/get_wiki_by_id " + id);
         p.waitFor();
         BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
