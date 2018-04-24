@@ -52,7 +52,8 @@ public class SearchService {
                 }
                 map.add(appearances);
             }));
-
+        System.out.println("Completed Search");
+        
         Set<String> result = map.get(map.size() - 1);
         int positionCount = map.size() - 2;
         for (int i = 1; i < strings.length; i++) {
@@ -68,16 +69,19 @@ public class SearchService {
                 i--;
             }
         }
-
+        System.out.println("Completed Set Combining");
         List<Article> articleList = new ArrayList<>();
         for (String s : result) {
             System.out.println(s);
             articleList.add(getArticle(Integer.valueOf(s)));
         }
+        System.out.println("Completed Getting Articles");
+        System.out.println(articleList.size());
         return articleList;
     }
 
     private Article getArticle(int id) throws IOException, InterruptedException {
+    	System.out.println("Getting Article" + id);
         Process p = Runtime.getRuntime().exec("/class/cs132/get_wiki_by_id " + id);
         p.waitFor();
         BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));

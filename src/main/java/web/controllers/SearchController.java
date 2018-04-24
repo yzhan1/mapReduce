@@ -27,6 +27,7 @@ public class SearchController {
     @GetMapping(value = "/search")
     public String search(@RequestParam("query") String query, Model model) throws IOException, InterruptedException {
         List<Article> results = service.search(query);
+        System.out.println("Search Controller Result Size:" + results.size());
         model.addAttribute("results", results);
         return "index";
     }
